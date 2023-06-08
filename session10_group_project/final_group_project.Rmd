@@ -1,6 +1,10 @@
 ---
 title: "Final Group project"
+<<<<<<< HEAD
 author: "test"
+=======
+author: "Your name goes here"
+>>>>>>> 6af9f6223f79f8b9bc8f5cd2f8b1eb4b7ad00bcc
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -16,6 +20,13 @@ output:
 
 
 ```{r}
+<<<<<<< HEAD
+=======
+
+# srber
+
+
+>>>>>>> 6af9f6223f79f8b9bc8f5cd2f8b1eb4b7ad00bcc
 #| label: load-libraries
 #| echo: false # This option disables the printing of code (only output is displayed).
 #| message: false
