@@ -325,7 +325,7 @@ fraud_rec <- recipe(is_fraud ~ ., data = card_fraud_train) %>%
     # Group 1: remove variables with 0 variance   
     step_zv(all_numeric(), -all_outcomes()) %>%
     #Group 1:  removehighly correlated variables
-    step_corr(all_predictors(), threshold = 0.95, method = "spearman") 
+    step_corr(all_predictors(), threshold = 0.90, method = "spearman") 
 
 
 
@@ -357,11 +357,37 @@ You should define the following classification models:
 ```{r, define_models}
 ## Model Building 
 
-# 1. Pick a `model type`
-# 2. set the `engine`
-# 3. Set the `mode`:  classification
+# Group 1: building the logistic regression
+log_spec <- logistic_reg() %>% 
+  set_engine(engine = "glm") %>% 
+  set_mode("classification")
 
+log_spec
 
+#Group 1:builsing the decision tree mdoel
+tree_spec <- decision_tree() %>% 
+  set_engine(engine = "C5.0") %>% 
+  set_mode("classification")
+
+tree_spec 
+
+#Group 1:Random forest model build
+rf_spec <- 
+  rand_forest() %>% 
+  set_engine("ranger", importance = "impurity") %>% 
+  set_mode("classification")
+
+#Group 1:XGBoost Model
+xgb_spec <- 
+  boost_tree() %>% 
+  set_engine("xgboost") %>% 
+  set_mode("classification") 
+
+#Group 1: K-nearest neighbour model spec
+knn_spec <- 
+  nearest_neighbor(neighbors = 4) %>% # we can adjust the number of neighbors 
+  set_engine("kknn") %>% 
+  set_mode("classification") 
 ```
 
 ## Bundle recipe and model with `workflows`
@@ -371,11 +397,12 @@ You should define the following classification models:
 
 ## Bundle recipe and model with `workflows`
 
-
 log_wflow <- # new workflow object
  workflow() %>% # use workflow function
  add_recipe(fraud_rec) %>%   # use the new recipe
  add_model(log_spec)   # add your model spec
+
+
 
 ```
 
