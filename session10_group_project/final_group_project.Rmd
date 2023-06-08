@@ -112,7 +112,8 @@ card_fraud <- card_fraud %>%
   mutate( hour = hour(trans_date_trans_time),
           wday = wday(trans_date_trans_time),
           month_name = month(trans_date_trans_time),
-          age = interval(dob, trans_date_trans_time) / years(1)
+          age = interval(dob, trans_date_trans_time) / years(1),
+          trans_year=factor(trans_year)
 ) %>% 
   rename(year = trans_year) %>% 
   
@@ -314,6 +315,8 @@ What steps are you going to add to your recipe? Do you need to do any log transf
 ```{r, define_recipe}
 
 fraud_rec <- recipe(is_fraud ~ ., data = card_fraud_train) %>%
+    #add threshold on hour
+    #step_other(hour, threshold = .05) %>% 
     # Group 1: transform the catagorical/factor variables
     step_novel(all_nominal_predictors()) %>%
     # Group 1: log transform amt to counter the RH skewness
@@ -406,22 +409,22 @@ log_wflow <- # new workflow object
 
 tree_wflow <-
  workflow() %>%
- add_recipe(movie_rec) %>% 
+ add_recipe(fraud_rec) %>% 
  add_model(tree_spec) 
 
 rf_wflow <-
  workflow() %>%
- add_recipe(movie_rec) %>% 
+ add_recipe(fraud_rec) %>% 
  add_model(rf_spec) 
 
 xgb_wflow <-
  workflow() %>%
- add_recipe(movie_rec) %>% 
+ add_recipe(fraud_rec) %>% 
  add_model(xgb_spec)
 
 knn_wflow <-
  workflow() %>%
- add_recipe(movie_rec) %>% 
+ add_recipe(fraud_rec) %>% 
  add_model(knn_spec)
 
 
@@ -433,6 +436,8 @@ knn_wflow <-
 You may want to compare the time it takes to fit each model. `tic()` starts a simple timer and `toc()` stops it
 
 ```{r, fit_models}
+
+#fitting the logistic regression
 tic()
 log_res <- log_wflow %>% 
   fit_resamples(
@@ -443,6 +448,9 @@ log_res <- log_wflow %>%
     control = control_resamples(save_pred = TRUE)) 
 time <- toc()
 log_time <- time[[4]]
+
+glimpse(time)
+glimpse(log_time)
 
 
 ```
