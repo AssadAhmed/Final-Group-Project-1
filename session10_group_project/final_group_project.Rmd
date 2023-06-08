@@ -230,10 +230,11 @@ glimpse(card_fraud)
 `category` has 14 unique values, and `job` has 494 unique values. The dataset is quite large, with over 670K records, so these variables don't have an excessive number of levels at first glance. However, it is worth seeing if we can compact the levels to a smaller number.
 ```{r}
 #new code block for tesing
+
 ```
 
 ```{r}
-#new code block for tesing 2
+
 ```
 
 
@@ -264,7 +265,11 @@ Thus, we will work with a smaller sample of 10% of the values the original datas
 # select a smaller subset
 my_card_fraud <- card_fraud %>% 
   # select a smaller subset, 10% of the entire dataframe 
-  slice_sample(prop = 0.10) 
+  slice_sample(prop = 0.10) %>% 
+  #select relevant columns
+  select('year','category','amt','city_pop','is_fraud','hour','wday','month_name','age','distance_km')
+
+glimpse(my_card_fraud)
 ```
 
 
