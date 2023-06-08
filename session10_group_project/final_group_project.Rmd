@@ -37,7 +37,7 @@ output:
 # library(ranger)
 
 
-PackageList =c('tidyverse','tidymodels','GGally','sf','wbstats','data.table','countrycode', 'skimr', 'here','leaflet','janitor','rpart.plot','scales','vip','skimr','rsample','DataExplorer','gt','recipe','tictoc')
+PackageList =c('tidyverse','tidymodels','GGally','sf','wbstats','data.table','countrycode', 'skimr', 'here','leaflet','janitor','rpart.plot','scales','vip','skimr','rsample','DataExplorer','gt','recipe','tictoc','Cubist','xgboost','c50','ranger')
 
 NewPackages=PackageList[!(PackageList %in% 
                             installed.packages()[,"Package"])]
@@ -157,35 +157,25 @@ Strings are usually not a useful format for classification problems. The strings
 
 
 ```{r}
-card_fraud %>% group_by()
-  mutate( hour = hour(trans_date_trans_time),
-          wday = wday(trans_date_trans_time),
-          month_name = month(trans_date_trans_time),
-          age = interval(dob, trans_date_trans_time) / years(1)
+# Group1 added
+# Group1: Just checking the data
 
-card_fraud <- recipe(is_fraud ~ ., data = card_fraud) %>%
-  step_other(category, threshold = .03) %>% 
-  step_dummy(all_nominal_predictors()) 
+glimpse(card_fraud)
+skim(card_fraud)
 
-movie_rec 
 
-category
+
 ```
 
 ```{r}
-card_fraud <- card_fraud %>% 
-  mutate( hour = hour(trans_date_trans_time),
-          wday = wday(trans_date_trans_time),
-          month_name = month(trans_date_trans_time),
-          age = interval(dob, trans_date_trans_time) / years(1)
+# Group1 added
+# Group1: Checking the fractions by group for category and job variables
+card_fraud %>% group_by(category) %>%   summarise(n = n()) %>% 
+  mutate(prop = n/sum(n)) %>% arrange(desc(prop))
 
-card_fraud <- recipe(is_fraud ~ ., data = card_fraud) %>%
-  step_other(category, threshold = .03) %>% 
-  step_dummy(all_nominal_predictors()) 
+card_fraud %>% group_by(job) %>%   summarise(n = n()) %>% 
+  mutate(prop = n/sum(n))  %>% arrange(desc(prop))
 
-movie_rec 
-
-category
 ```
 
 
@@ -198,7 +188,22 @@ We have plenty of geospatial data as lat/long pairs, so I want to convert city/s
 
 ##  Exploring factors: how is the compactness of categories?
 
+
+```{r}
+# Group1 added
+# Group1: Checking the fractions by group for ciry and state variables
+card_fraud %>% group_by(city) %>%   summarise(n = n()) %>% 
+  mutate(prop = n/sum(n)) %>% arrange(desc(prop))
+
+card_fraud %>% group_by(state) %>%   summarise(n = n()) %>% 
+  mutate(prop = n/sum(n))  %>% arrange(desc(prop))
+
+```
+
+
 -   Do we have excessive number of categories? Do we want to combine some?
+
+# Group1: Yes, both category and job have too many categories, espeially job variable. It does not make sense to group Others for jobs because the largest group is very small so there is no good threshold. we just drop this var. However, we can group category var. 
 
 ```{r}
 card_fraud %>% 
