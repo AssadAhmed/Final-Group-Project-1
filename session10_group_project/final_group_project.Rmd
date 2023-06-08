@@ -219,6 +219,10 @@ card_fraud %>%
 ```
 
 
+
+
+
+
 The predictors `category` and `job` are transformed into factors.
 
 ```{r}
@@ -234,14 +238,102 @@ glimpse(card_fraud)
 ```
 
 `category` has 14 unique values, and `job` has 494 unique values. The dataset is quite large, with over 670K records, so these variables don't have an excessive number of levels at first glance. However, it is worth seeing if we can compact the levels to a smaller number.
+
 ```{r}
 #new code block for tesing
 
 ```
 
 ```{r}
+# Group1. Checking the distribution of transaction amounts for fraud vs non-fraud transactions
+card_fraud %>% mutate(is_fraud = factor(is_fraud) ) %>% ggplot(aes(x =  amt, fill= is_fraud, color=is_fraud)) +
+  geom_density(position="identity") +
+theme_minimal() +
+  scale_x_continuous(trans="log10") 
+
 
 ```
+
+
+```{r}
+# Group1. Checking the fraction of  fraud transactions by transaction categories
+
+
+card_fraud %>%   filter(is_fraud==1) %>% mutate(total = mean(amt)*n()) %>%  group_by(category) %>%   summarise(total_by_category = sum(amt),total=mean(total)) %>%  mutate(frac_fraud_by_cat = round(total_by_category/total,3)) %>% arrange(desc(frac_fraud_by_cat)) %>% mutate(category = fct_reorder(category,frac_fraud_by_cat)) %>%  ggplot(aes(x = frac_fraud_by_cat, y = category)) +
+  geom_col() +
+  # add n to each bar
+  theme_minimal() +
+  theme(text=element_text(size=16))+
+  labs(
+    title = "Most Popular Categories for Credit Card Fraud",
+    x= "Fraction of fraud dollars",
+    y = NULL)+
+  # ensure title is top-left aligned
+  theme(plot.title.position = "plot")
+
+
+
+```
+
+```{r}
+
+# Group1: most popular wday for fraud
+ 
+ card_fraud %>% filter(is_fraud==1) %>% mutate(total = mean(amt)*n(), wday = factor(wday)) %>%  group_by(wday) %>%   summarise(total_by_date = sum(amt),total=mean(total)) %>%  mutate(frac_fraud_by_date = round(total_by_date/total,6))  %>% mutate(wday = fct_reorder(wday,frac_fraud_by_date)) %>% ungroup()  %>%  ggplot(aes(x = frac_fraud_by_date, y = wday)) +
+  geom_col() +
+  # add n to each bar
+  theme_minimal() +
+  theme(text=element_text(size=16))+
+  labs(
+    title = "Most Popular Days for Credit Card Fraud",
+    x= "Fraction of fraud dollars",
+    y = NULL)+
+  # ensure title is top-left aligned
+  theme(plot.title.position = "plot")
+
+```
+
+```{r}
+   # most popular hour for fraud
+ card_fraud %>% filter(is_fraud==1) %>% mutate(total = mean(amt)*n(), hour = factor(hour)) %>% 
+   group_by(hour) %>%     summarise(total_by_date = sum(amt),total=mean(total)) %>%  mutate(frac_fraud_by_date = round(total_by_date/total,6))  %>% mutate(hour = fct_reorder(hour,frac_fraud_by_date)) %>% ungroup() %>% 
+   ggplot(aes(x = frac_fraud_by_date, y = hour)) +
+  geom_col() +
+  # add n to each bar
+  theme_minimal() +
+  theme(text=element_text(size=16))+
+  labs(
+    title = "Most Popular Hours for Credit Card Fraud",
+    x= "Fraction of fraud dollars",
+    y = NULL) +
+  # ensure title is top-left aligned
+  theme(plot.title.position = "plot")
+
+
+```
+
+```{r}
+# Group 1. Checking the most popular month for fraud.
+
+ card_fraud %>% filter(is_fraud==1) %>% mutate(total = mean(amt)*n(), month_name = factor(month_name)) %>% 
+   group_by(month_name) %>%  
+   summarise(total_by_date = sum(amt),total=mean(total)) %>%  mutate(frac_fraud_by_date = round(total_by_date/total,6))  %>% mutate(month_name = fct_reorder(month_name,frac_fraud_by_date)) %>% 
+   ungroup() %>%  ggplot(aes(x = frac_fraud_by_date, y = month_name)) +
+  geom_col() +
+  # add n to each bar
+  theme_minimal() +
+  theme(text=element_text(size=16))+
+  labs(
+    title = "Most Popular Months for Credit Card Fraud",
+    x= "Fraction of fraud dollars",
+    y = NULL)+
+  # ensure title is top-left aligned
+  theme(plot.title.position = "plot")
+
+
+
+```
+
 
 
 ### Why do we care about the number of categories and whether they are "excessive"?
