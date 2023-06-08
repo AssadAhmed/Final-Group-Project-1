@@ -309,7 +309,18 @@ What steps are you going to add to your recipe? Do you need to do any log transf
 ```{r, define_recipe}
 
 fraud_rec <- recipe(is_fraud ~ ., data = card_fraud_train) %>%
-
+    # Group 1: transform the catagorical/factor variables
+    step_novel(all_nominal_predictors) %>%
+    # Group 1: log transform amt to counter the RH skewness
+    step_log(amt) %>% 
+    # Group 1: recenter and standardise 
+    step_normalize(all_numeric(), -all_outcomes()) %>% 
+    #Group 1: Convert the catagorical variables into binary columns
+    step_dummy(all_nominal_predictors()) %>% 
+    # Group 1: remove variables with 0 variance   
+    step_zv(all_numeric(), -all_outcomes()) %>%
+    #Group 1:  removehighly correlated variables
+    step_corr(all_predictors(), threshold = 0.95, method = "spearman") 
 
 
 
