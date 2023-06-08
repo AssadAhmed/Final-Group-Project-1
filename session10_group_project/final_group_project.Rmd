@@ -20,13 +20,6 @@ output:
 
 
 ```{r}
-
-
-# srber
-
-#sd egrwertgwe 
-  
-#testing 3
   
 
 #| label: load-libraries
@@ -108,8 +101,8 @@ We also add some of the variables we considered in our EDA for this dataset duri
 ```{r}
 card_fraud <- card_fraud %>% 
   mutate( hour = hour(trans_date_trans_time),
-          wday = wday(trans_date_trans_time, label = TRUE),
-          month_name = month(trans_date_trans_time, label = TRUE),
+          wday = wday(trans_date_trans_time),
+          month_name = month(trans_date_trans_time),
           age = interval(dob, trans_date_trans_time) / years(1)
 ) %>% 
   rename(year = trans_year) %>% 
@@ -130,6 +123,10 @@ card_fraud <- card_fraud %>%
 
   )
 
+
+glimpse(card_fraud)
+skim(card_fraud)
+head(card_fraud)
 ```
 
 ## Exploratory Data Analysis (EDA) 
@@ -186,9 +183,15 @@ card_fraud <- card_fraud %>%
   mutate(category = factor(category),
          job = factor(job))
 
+glimpse(card_fraud)
+
 ```
 
 `category` has 14 unique values, and `job` has 494 unique values. The dataset is quite large, with over 670K records, so these variables don't have an excessive number of levels at first glance. However, it is worth seeing if we can compact the levels to a smaller number.
+```{r}
+#new code block for tesing
+```
+
 
 ### Why do we care about the number of categories and whether they are "excessive"?
 
