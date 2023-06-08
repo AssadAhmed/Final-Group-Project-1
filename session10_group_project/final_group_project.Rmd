@@ -26,9 +26,18 @@ output:
 #| echo: false # This option disables the printing of code (only output is displayed).
 #| message: false
 #| warning: false
+# 
+# library(tidyverse)
+# library(tidymodels)
+# library(skimr)
+# library(kknn)
+# library(here)
+# library(tictoc)
+# library(vip)
+# library(ranger)
 
 
-PackageList =c('tidyverse','tidymodels','GGally','sf','wbstats','data.table','countrycode', 'skimr', 'here','leaflet','janitor','rpart.plot','scales','vip','skimr','rsample','DataExplorer','gt','recipe')
+PackageList =c('tidyverse','tidymodels','GGally','sf','wbstats','data.table','countrycode', 'skimr', 'here','leaflet','janitor','rpart.plot','scales','vip','skimr','rsample','DataExplorer','gt','recipe','tictoc')
 
 NewPackages=PackageList[!(PackageList %in% 
                             installed.packages()[,"Package"])]
@@ -124,9 +133,6 @@ card_fraud <- card_fraud %>%
   )
 
 
-glimpse(card_fraud)
-skim(card_fraud)
-head(card_fraud)
 ```
 
 ## Exploratory Data Analysis (EDA) 
@@ -148,6 +154,40 @@ Strings are usually not a useful format for classification problems. The strings
 
 -   `category`, Category of Merchant
 -   `job`, Job of Credit Card Holder
+
+
+```{r}
+card_fraud %>% group_by()
+  mutate( hour = hour(trans_date_trans_time),
+          wday = wday(trans_date_trans_time),
+          month_name = month(trans_date_trans_time),
+          age = interval(dob, trans_date_trans_time) / years(1)
+
+card_fraud <- recipe(is_fraud ~ ., data = card_fraud) %>%
+  step_other(category, threshold = .03) %>% 
+  step_dummy(all_nominal_predictors()) 
+
+movie_rec 
+
+category
+```
+
+```{r}
+card_fraud <- card_fraud %>% 
+  mutate( hour = hour(trans_date_trans_time),
+          wday = wday(trans_date_trans_time),
+          month_name = month(trans_date_trans_time),
+          age = interval(dob, trans_date_trans_time) / years(1)
+
+card_fraud <- recipe(is_fraud ~ ., data = card_fraud) %>%
+  step_other(category, threshold = .03) %>% 
+  step_dummy(all_nominal_predictors()) 
+
+movie_rec 
+
+category
+```
+
 
 ***Strings to Geospatial Data*** 
 
@@ -190,6 +230,10 @@ glimpse(card_fraud)
 `category` has 14 unique values, and `job` has 494 unique values. The dataset is quite large, with over 670K records, so these variables don't have an excessive number of levels at first glance. However, it is worth seeing if we can compact the levels to a smaller number.
 ```{r}
 #new code block for tesing
+```
+
+```{r}
+#new code block for tesing 2
 ```
 
 
