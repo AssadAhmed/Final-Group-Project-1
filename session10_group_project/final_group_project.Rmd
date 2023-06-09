@@ -720,7 +720,17 @@ This is a highly imbalanced data set, as roughly 99.5% of all transactions are o
 
 # - `last_fit()`  fits a model to the whole training data and evaluates it on the test set. 
 # - provide the workflow object of the best model as well as the data split object (not the training data). 
- 
+
+last_fit_xgb <- last_fit(xgb_wflow, 
+                        split = data_split,
+                        metrics = metric_set(
+                          accuracy, f_meas, kap, precision,
+                          recall, roc_auc, sens, spec))
+
+last_fit_xgb %>% collect_metrics(summarize = TRUE)
+
+#Compare to training
+xgb_res %>% collect_metrics(summarize = TRUE)
 
 ```
 
@@ -730,7 +740,12 @@ This is a highly imbalanced data set, as roughly 99.5% of all transactions are o
 
 
 ```{r}
-
+#checking importance
+last_fit_xgb %>% 
+  pluck(".workflow", 1) %>%   
+  pull_workflow_fit() %>% 
+  vip(num_features = 10) +
+  theme_light()
 ```
 
 ## Plot Final Confusion matrix and ROC curve
