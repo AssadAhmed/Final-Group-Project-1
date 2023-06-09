@@ -740,12 +740,7 @@ xgb_res %>% collect_metrics(summarize = TRUE)
 
 
 ```{r}
-#checking importance
-last_fit_xgb %>% 
-  pluck(".workflow", 1) %>%   
-  pull_workflow_fit() %>% 
-  vip(num_features = 10) +
-  theme_light()
+skim(card_fraud_train)
 ```
 
 ## Plot Final Confusion matrix and ROC curve
@@ -777,7 +772,7 @@ last_fit_xgb %>%
 #| label: savings-for-cc-company
 
 best_model_preds <- 
-  best_model_wflow %>% 
+  xgb_wflow %>% 
   fit(data = card_fraud_train) %>%  
   
   ## Use `augment()` to get predictions for entire data set
@@ -789,35 +784,44 @@ best_model_preds %>%
 cost <- best_model_preds %>%
   select(is_fraud, amt, pred = .pred_class) 
 
+skim(cost %>% mutate(is_fraud_num = as.numeric(is_fraud),pred_num = as.numeric(pred),) )
+glimpse(cost)
+
+```
+```{r}
+
+
 cost <- cost %>%
   mutate(
-  
-
+  is_fraud_num  =  as.numeric(is_fraud) -1,
+  pred_num  =  as.numeric(pred) -1 ,
   # naive false-- we think every single transaction is ok and not fraud
-
+naive_false = is_fraud_num * amt,
 
   # false negatives-- we thought they were not fraud, but they were
+  false_negatives = is_fraud_num * (1-pred_num) * amt,
 
-  
-  
+
   # false positives-- we thought they were fraud, but they were not
-
-  
-    
-  # true positives-- we thought they were fraud, and they were 
+  false_positives = (1-is_fraud_num) * (pred_num) * amt,
 
 
-  
-  # true negatives-- we thought they were ok, and they were 
+  # true positives-- we thought they were fraud, and they were
+  true_positives = is_fraud_num * pred_num * amt,
+
+
+  # true negatives-- we thought they were ok, and they were
+true_negatives = (1-is_fraud_num) * (1-pred_num) * amt
 )
-  
+
 # Summarising
 
-cost_summary <- cost %>% 
-  summarise(across(starts_with(c("false","true", "amt")), 
+cost_summary <- cost %>%
+  summarise(across(starts_with(c("false","true", "amt")),
             ~ sum(.x, na.rm = TRUE)))
 
 cost_summary
+
 
 ```
 
