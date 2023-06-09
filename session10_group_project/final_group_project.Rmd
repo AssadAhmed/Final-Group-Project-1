@@ -527,9 +527,13 @@ knn_wflow <-
 
 You may want to compare the time it takes to fit each model. `tic()` starts a simple timer and `toc()` stops it
 
-```{r, fit_models}
 
+
+```{r}
+
+## Fit models
 #fitting the logistic regression
+
 tic()
 log_res <- log_wflow %>% 
   fit_resamples(
@@ -543,7 +547,67 @@ log_time <- time[[4]]
 
 glimpse(time)
 glimpse(log_time)
+```
 
+```{r, fit_models}
+# fitting the decision tree
+tic()
+tree_res <- tree_wflow %>% 
+  fit_resamples(
+    resamples = cv_folds,
+    metrics = metric_set(
+      recall, precision, f_meas, accuracy,
+      kap, roc_auc, sens, spec),
+    control = control_resamples(save_pred = TRUE))
+time <- toc()
+tree_time <- time[[4]]
+
+glimpse(tree_time)
+```
+
+```{r, fit_models}
+# fitting the random forest
+tic()
+rf_res <- rf_wflow %>% 
+  fit_resamples(
+    resamples = cv_folds,
+    metrics = metric_set(
+      recall, precision, f_meas, accuracy,
+      kap, roc_auc, sens, spec),
+    control = control_resamples(save_pred = TRUE))
+time <- toc()
+rf_time <- time[[4]]
+
+glimpse(rf_time)
+```
+
+```{r, fit_models}
+# fitting the XGBoost model
+tic()
+xgb_res <- xgb_wflow %>% 
+  fit_resamples(
+    resamples = cv_folds,
+    metrics = metric_set(
+      recall, precision, f_meas, accuracy,
+      kap, roc_auc, sens, spec),
+    control = control_resamples(save_pred = TRUE))
+time <- toc()
+xgb_time <- time[[4]]
+glimpse(knn_time)
+```
+
+```{r, fit_models}
+# fitting the k-nearest neighbors model
+tic()
+knn_res <- knn_wflow %>% 
+  fit_resamples(
+    resamples = cv_folds,
+    metrics = metric_set(
+      recall, precision, f_meas, accuracy,
+      kap, roc_auc, sens, spec),
+    control = control_resamples(save_pred = TRUE))
+time <- toc()
+knn_time <- time[[4]]
 
 ```
 
@@ -560,6 +624,21 @@ log_metrics <-
          time = log_time)
 
 # add mode models here
+tree_metrics <- tree_res %>% 
+  collect_metrics(summarise = TRUE) %>%
+  mutate(model = "Decision Tree", time = tree_time)
+
+rf_metrics <- rf_res %>% 
+  collect_metrics(summarise = TRUE) %>%
+  mutate(model = "Random Forest", time = rf_time)
+
+xgb_metrics <- xgb_res %>% 
+  collect_metrics(summarise = TRUE) %>%
+  mutate(model = "XGBoost", time = xgb_time)
+
+knn_metrics <- knn_res %>% 
+  collect_metrics(summarise = TRUE) %>%
+  mutate(model = "k-Nearest Neighbors", time = knn_time)
 
 # create dataframe with all models
 model_compare <- bind_rows(log_metrics,
@@ -572,6 +651,10 @@ model_compare <- bind_rows(log_metrics,
   mutate(time = str_sub(time, end = -13) %>% 
            as.double()
          )
+
+
+model_compare
+
 
 
 ```
