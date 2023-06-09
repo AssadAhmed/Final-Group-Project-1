@@ -37,7 +37,7 @@ output:
 # library(ranger)
 
 
-PackageList =c('tidyverse','tidymodels','GGally','sf','wbstats','data.table','countrycode', 'skimr', 'here','leaflet','janitor','rpart.plot','scales','vip','skimr','rsample','DataExplorer','gt','recipe','tictoc','Cubist','xgboost','c50','ranger')
+PackageList =c('tidyverse','tidymodels','GGally','sf','wbstats','data.table','countrycode', 'skimr', 'here','leaflet','janitor','rpart.plot','scales','vip','skimr','rsample','DataExplorer','gt','recipe','tictoc','Cubist','xgboost','C50','ranger')
 
 NewPackages=PackageList[!(PackageList %in% 
                             installed.packages()[,"Package"])]
@@ -335,6 +335,51 @@ card_fraud %>%   filter(is_fraud==1) %>% mutate(total = mean(amt)*n()) %>%  grou
 ```
 
 
+```{r}
+
+# Group1: most popular age group for fraud
+
+
+  # most popular months for fraud
+ card_fraud %>% filter(is_fraud==1) %>% mutate(total = mean(amt)*n(), month_name = factor(month_name), age_group = case_when(age<=25 ~"<=25",age<=35 & age>25 ~"[26,35]",age<=45 & age>35 ~"[36,45]",age<=55 & age>45 ~"[46,55]", age<=65 & age>55 ~"[56,65]",.default = ">65" )) %>% 
+   group_by(age_group) %>%  
+   summarise(total_by_date = sum(amt),total=mean(total)) %>%  mutate(frac_fraud_by_date = round(total_by_date/total,6))  %>% mutate(age_group = fct_reorder(age_group,frac_fraud_by_date)) %>% 
+   ungroup() %>%  
+   ggplot(aes(x = frac_fraud_by_date, y = age_group)) +
+  geom_col() +
+  # add n to each bar
+  theme_minimal() +
+  theme(text=element_text(size=16)) +
+  labs(
+    title = "Most Popular Age Groups for Credit Card Fraud",
+    x= "Fraction of fraud dollars",
+    y = NULL)+
+  # ensure title is top-left aligned
+  theme(plot.title.position = "plot")
+
+
+```
+
+```{r}
+
+# Group1: checking distance by fraud/non-fraud transaction 
+
+card_fraud %>%    mutate(is_fraud=factor(is_fraud)) %>% 
+ ggplot(aes(x = distance_km, y = is_fraud )) +
+  geom_boxplot() +
+  theme_minimal() +
+   scale_x_continuous(trans="log2") +
+  theme(text=element_text(size=16)) +
+  labs(title = "Distance for Legitimate and Fraudilent Transactoins",
+    y= "Is it a fraud",
+    x = NULL) +
+# ensure title is top-left aligned
+  theme(plot.title.position = "plot")
+
+
+```
+
+
 
 ### Why do we care about the number of categories and whether they are "excessive"?
 
@@ -593,7 +638,7 @@ xgb_res <- xgb_wflow %>%
     control = control_resamples(save_pred = TRUE))
 time <- toc()
 xgb_time <- time[[4]]
-glimpse(knn_time)
+
 ```
 
 ```{r, fit_models}
@@ -662,6 +707,11 @@ model_compare
 ## Which metric to use
 
 This is a highly imbalanced data set, as roughly 99.5% of all transactions are ok, and it's only 0.5% of transactions that are fraudulent. A `naive` model, which classifies everything as ok and not-fraud, would have an accuracy of 99.5%, but what about the sensitivity, specificity, the AUC, etc?
+
+# The sensitivity is defined as  TP / (TP + FN) where TP is True Positive and FN is a False negative. With a `naive` model would be 0 since we classify everything as 0 (no fraud), so TP =0. Specificity is defines as TN/(TN+FP), on the other hand, will be 0.995. It means that AUC score would be 0 since we have TP=0 in the model.   
+
+
+
 
 ## `last_fit()`
 ```{r}
