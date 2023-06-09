@@ -37,7 +37,7 @@ output:
 # library(ranger)
 
 
-PackageList =c('tidyverse','tidymodels','GGally','sf','wbstats','data.table','countrycode', 'skimr', 'here','leaflet','janitor','rpart.plot','scales','vip','skimr','rsample','DataExplorer','gt','recipe','tictoc','Cubist','xgboost','C50','ranger')
+PackageList =c('tidyverse','tidymodels','GGally','sf','wbstats','data.table','countrycode', 'skimr', 'here','leaflet','janitor','rpart.plot','scales','vip','skimr','rsample','DataExplorer','gt','recipe','tictoc','Cubist','xgboost','C50','ranger','lubridate')
 
 NewPackages=PackageList[!(PackageList %in% 
                             installed.packages()[,"Package"])]
